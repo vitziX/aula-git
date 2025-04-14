@@ -1,19 +1,248 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Document</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Contador de Clientes - Restaurante Japonês</title>
+    <style>
+        
+        @import url('https://fonts.googleapis.com/css2?family=Noto+Serif+JP:wght@400;700&display=swap');
+        
+        :root {
+            --dourado: #ffd700;
+            --vermelho: #b22222;
+            --preto: #1a1a1a;
+            --sombra: rgba(0, 0, 0, 0.3);
+        }
+        
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        
+        body {
+            font-family: 'Noto Serif JP', serif;
+            text-align: center;
+            color: var(--dourado);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            background: linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), 
+                        url('https://images.unsplash.com/photo-1555396273-367ea4eb4db5?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80') no-repeat center center fixed;
+            background-size: cover;
+            position: relative;
+            overflow-x: hidden;
+        }
+
+        .container {
+            background: rgba(178, 34, 34, 0.85);
+            width: 100%;
+            max-width: 400px;
+            padding: 25px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px var(--sombra);
+            backdrop-filter: blur(3px);
+            border: 1px solid var(--dourado);
+            margin: 20px 0;
+        }
+
+        h1 {
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 15px;
+            text-shadow: 2px 2px 4px var(--sombra);
+            color: var(--dourado);
+        }
+
+        h2 {
+            font-size: clamp(1.3rem, 3.5vw, 1.8rem);
+            margin: 15px 0;
+            text-shadow: 1px 1px 3px var(--sombra);
+        }
+
+        #txtcontador {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: white;
+        }
+
+        #botoes {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-top: 25px;
+        }
+
+        button {
+            background-color: var(--dourado);
+            color: var(--preto);
+            border: none;
+            padding: 12px;
+            font-size: clamp(0.9rem, 3vw, 1rem);
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+            box-shadow: 0 4px 6px var(--sombra);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 50px;
+        }
+
+        button:hover {
+            background-color: #ffcc00;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 8px var(--sombra);
+        }
+
+        button:active {
+            transform: translateY(1px);
+            box-shadow: 0 2px 4px var(--sombra);
+        }
+
+        #btnZerar {
+            grid-column: span 2;
+            background-color: var(--preto);
+            color: var(--dourado);
+        }
+
+        
+        .sakura {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: -1;
+            overflow: hidden;
+        }
+
+        
+        @media (max-width: 480px) {
+            .container {
+                padding: 20px 15px;
+                margin: 10px;
+            }
+            
+            #botoes {
+                grid-template-columns: 1fr;
+            }
+            
+            #btnZerar {
+                grid-column: span 1;
+            }
+            
+            button {
+                padding: 10px;
+                min-height: 45px;
+            }
+        }
+    </style>
 </head>
 <body>
-    <h1>Menor site do mundo</h1>
-    <h2>Quem não prestar atenção vai errar</h2>
-    <h3>Alteração final</h3>
-    <ul>
-        <li>Pão de alho</li>
-        <li>Alcatra</li>
-        <li>Coraçãozinho</li>
-        <li>Picanha</li>
-    </ul>
+    
+    <div class="sakura"></div>
+    
+    <div class="container">
+        <h1>🍣 Contador de Clientes 🍱</h1>
+        <h2 id="txtcontador">0</h2>
+        <div id="botoes">
+            <button id="btnEntrou">ENTROU (+1)</button>
+            <button id="btnSaiu">SAIU (-1)</button>
+            <button id="btnAumentar2">+2 CLIENTES</button>
+            <button id="btnDiminuir2">-2 CLIENTES</button>
+            <button id="btnZerar">ZERAR CONTADOR</button>
+        </div>
+        <h2 id="txtmensagem">Pode entrar!</h2>
+    </div>
+
+    <script>
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            let contador = 0;
+            const txtcontador = document.getElementById('txtcontador');
+            const mensagem = document.getElementById('txtmensagem');
+            const maxClientes = 20;
+            
+            
+            const playSound = (type) => {
+                if(typeof Audio !== 'undefined') {
+                    const sounds = {
+                        enter: 'https://assets.mixkit.co/sfx/preview/mixkit-positive-interface-beep-221.mp3',
+                        exit: 'https://assets.mixkit.co/sfx/preview/mixkit-arcade-game-jump-coin-216.mp3',
+                        reset: 'https://assets.mixkit.co/sfx/preview/mixkit-unlock-game-notification-253.mp3'
+                    };
+                    const audio = new Audio(sounds[type]);
+                    audio.volume = 0.3;
+                    audio.play().catch(e => console.log('Audio não pode ser reproduzido'));
+                }
+            };
+            
+            
+            const atualizarContador = () => {
+                txtcontador.textContent = contador;
+                txtcontador.style.color = contador === maxClientes ? '#ff5555' : 'white';
+                
+                if (contador >= maxClientes * 0.75 && contador < maxClientes) {
+                    mensagem.textContent = '⚠️ Quase lotado!';
+                    mensagem.style.color = '#ffcc00';
+                } else if (contador === maxClientes) {
+                    mensagem.textContent = '❌ LOTADO!';
+                    mensagem.style.color = '#ff5555';
+                } else {
+                    mensagem.textContent = '✅ Pode entrar!';
+                    mensagem.style.color = '#a5ffa5';
+                }
+            };
+            
+            
+            const aumentar = (qtd = 1) => {
+                if (contador < maxClientes) {
+                    contador = Math.min(contador + qtd, maxClientes);
+                    playSound('enter');
+                    atualizarContador();
+                }
+            };
+            
+            const diminuir = (qtd = 1) => {
+                if (contador > 0) {
+                    contador = Math.max(contador - qtd, 0);
+                    playSound('exit');
+                    atualizarContador();
+                }
+            };
+            
+            const zerar = () => {
+                if (contador > 0) {
+                    contador = 0;
+                    playSound('reset');
+                    atualizarContador();
+                }
+            };
+            
+            
+            document.getElementById('btnEntrou').addEventListener('click', () => aumentar(1));
+            document.getElementById('btnSaiu').addEventListener('click', () => diminuir(1));
+            document.getElementById('btnAumentar2').addEventListener('click', () => aumentar(2));
+            document.getElementById('btnDiminuir2').addEventListener('click', () => diminuir(2));
+            document.getElementById('btnZerar').addEventListener('click', zerar);
+            
+           
+            atualizarContador();
+            
+            
+            try {
+                const sakuraContainer = document.querySelector('.sakura');
+                if(sakuraContainer) {
+                    
+                    console.log('Efeito de sakura disponível para implementação');
+                }
+            } catch(e) {
+                console.log('Efeito de sakura não carregado');
+            }
+        });
+    </script>
 </body>
 </html>
